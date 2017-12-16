@@ -1,42 +1,58 @@
 import Renderer from "./modules/renderer"
-
-let canvas = document.getElementById("game");
+import MoveHandler from "./modules/movehandler"
+import Shape from "./modules/shape"
 
 class Game {
-    constructor() {
-        this.speed = 100;
-        this.y = 0;
-        this.x = 100;
+    constructor(options) {
+        this.options = options;
+        this.blocks = [];
+        this.currentShape = new Shape(this.options.scale);
+        this.renderer = new Renderer(this);
+        this.moveHandler = new MoveHandler(this)
     }
 
     main() {
-        let now = Date.now();
-        this.dt = (now - this.lastTime) / 1000.0;
+        this.currentTime = new Date().getTime();
 
-        this.update();
-        this.render();
-
-        this.lastTime = now;
+        if (this.currentTime - this.lastTime > (1000 / this.options.fps) ){
+            this.renderer.render();
+            this.update();
+            this.lastTime = this.currentTime;
+        }
+        
         requestAnimationFrame(() => this.main());
     }
 
     update() {
-        this.y += this.speed * this.dt;
+        this.moveHandler.tickDown();
+        this.moveHandler.checkMovement();
+    }
 
-        if (this.y >= canvas.height) {
-            this.y = 0;
+    resetFps() {
+        this.options.fps = this.options.defaultFps;
+    }
+
+    lockShape() {
+        this.currentShape.blocks.forEach((block) => this.blocks.push(block));
+        this.currentShape = new Shape(this.options.scale);
+
+        if (!this.moveHandler.canMoveDown()) {
+            //game over
+             this.blocks = [];
         }
     }
 
-    render() {
-        Renderer.render(this);
-    }
-
     start() {
-        this.lastTime = Date.now();
+        this.lastTime = new Date().getTime();
         this.main();
     }
 }
 
-let game = new Game();
+let options = {
+    defaultFps: 1,
+    fps: 1,
+    scale: 30
+}
+
+let game = new Game(options);
 game.start();
