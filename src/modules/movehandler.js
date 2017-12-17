@@ -3,8 +3,9 @@ const RIGHT = 'Right';
 const DOWN = 'Down';
 
 class MoveHandler {
-	constructor(game) {
-		this.game = game;
+	constructor(renderer) {
+		this.renderer = renderer;
+		this.grid = renderer.grid;
 		this.keys = [];
 		document.addEventListener("keyup", (e) => this._removeKey(e)); 
 		document.addEventListener("keydown", (e) => this._saveKey(e));
@@ -28,60 +29,68 @@ class MoveHandler {
 
 	_saveKey(e) {
 		this.keys[e.keyCode] = true;
-		this.checkMovement();
+		this._checkMovement();
 	}
 
 	_removeKey(e) {
 		if (this._isDown()) {
-			this.game.resetFps();
+			this.grid._setGameSpeed();
 		}
 		this.keys[e.keyCode] = false;
 	}
 
 	_checkLeftMovement() {
-		if (this._isLeft() && this.game.currentShape.canMove(LEFT, this.game.blocks)) {
-            this.game.currentShape.move(LEFT);
+		if (this._isLeft() && this.grid.currentShape.canMove(LEFT, this.grid.blocks)) {
+            this.grid.currentShape.move(LEFT);
         } 
 	}
 
 	_checkRightMovement() {
-        if (this._isRight() && this.game.currentShape.canMove(RIGHT, this.game.blocks)) {
-            this.game.currentShape.move(RIGHT);
+        if (this._isRight() && this.grid.currentShape.canMove(RIGHT, this.grid.blocks)) {
+            this.grid.currentShape.move(RIGHT);
         }
 	}
 
 	_checkRotation() {
-        if (this._isTop() && this.game.currentShape.canRotate(this.game.blocks)) {
-            this.game.currentShape.rotate();
+        if (this._isTop() && this.grid.currentShape.canRotate(this.grid.blocks)) {
+            this.grid.currentShape.rotate();
         }
 	}
 
 	_checkDownMovement() {
 		if (this._isDown()) {
-			this.game.options.fps = 30;
+			this.grid._setGameSpeed(this.grid.options.maxFps);
 			this.tickDown();
         }
 	}
 
-	tickDown() {
-		if (this.canMoveDown()) {
-	        this.game.currentShape.move(DOWN);
-        } else {
-        	this.game.lockShape();
-        }
+
+    _checkGameOver() {
+		if (!this._canMoveDown()) {
+			this.grid.reset();
+		}
 	}
 
-	canMoveDown() {
-		return this.game.currentShape.canMove(DOWN, this.game.blocks)
+	_canMoveDown() {
+		return this.grid.currentShape.canMove(DOWN, this.grid.blocks)
 	}
 
-	checkMovement() {
+	_checkMovement() {
 		this._checkRotation();
 		this._checkLeftMovement();
 		this._checkRightMovement();
 		this._checkDownMovement();
-		this.game.renderer.render();
+		this.renderer.render();
     }
+
+	tickDown() {
+		if (this._canMoveDown()) {
+	        this.grid.currentShape.move(DOWN);
+        } else {
+        	this.grid.lockShape();
+        	this._checkGameOver();
+        }
+	}
 }
 
 export default MoveHandler

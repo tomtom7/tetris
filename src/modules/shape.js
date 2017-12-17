@@ -15,19 +15,19 @@ class Shape {
 	}
 
 	canMove(direction, gridBlocks) {
-		return this.blocks.every((b) => b['canMove' + direction](gridBlocks)); 
+		return this.blocks.every(b => b['canMove' + direction](gridBlocks)); 
 	}
 
 	move(direction) {
-		this.blocks.forEach((b) => b['move' + direction]());
+		this.blocks.forEach(b => b['move' + direction]());
 	}
 
 	canRotate(gridBlocks) {
-		return this.type != 'O' && this.blocks.every((b) => b.canRotate(gridBlocks));
+		return this.type != 'O' && this.blocks.every(b => b.canRotate(gridBlocks));
 	}
 
 	rotate() {
-		this.blocks.forEach((b) => b.rotate());
+		this.blocks.forEach(b => b.rotate());
 	}
 
 }

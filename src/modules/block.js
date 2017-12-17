@@ -1,4 +1,4 @@
-let canvas = document.getElementById("game");
+let canvas = document.getElementById("game-canvas");
 
 class Block {
 	constructor(x, y, color, scale, offsetX, offsetY) {
@@ -10,38 +10,42 @@ class Block {
         this.offsetY = offsetY * this.scale;
     }
 
-    canMoveLeft(blocks) {
-    	let x = this.x - this.scale;
-    	return x >= 0 && !this.gridHasBlock(blocks, {x: x, y: this.y});
+    _gridHasBlock(blocks, block) {
+        return blocks.find(b => b.isSameBlock(block));
     }
 
-    canMoveRight(blocks) {
-    	let x = this.x + (2 * this.scale);
-    	return x <= canvas.width && !this.gridHasBlock(blocks, {x: x, y: this.y});
-    }
-
-    canMoveDown(blocks) {
-    	let y = this.y + this.scale;
-    	return y < canvas.height && !this.gridHasBlock(blocks, {x: this.x, y: y});
-    }
-
-    canRotate(blocks) {
-        let coords = this.getRotationCoords();
-        let x = coords[0];
-        let y = coords[1];
-
-        return x >= 0 && 
-            x <= canvas.width && 
-            y >= 0 && 
-            y <= canvas.height && 
-            !this.gridHasBlock(blocks, {x: x, y: y});
-    }
-
-    getRotationCoords() {
+    _getRotationCoords() {
         let x = this.x - this.offsetX - this.offsetY;
         let y = this.y - this.offsetY + this.offsetX;
 
         return [x, y];
+    }
+
+    canMoveLeft(blocks) {
+    	let x = this.x - this.scale;
+    	return x >= 0 && !this._gridHasBlock(blocks, {x: x, y: this.y});
+    }
+
+    canMoveRight(blocks) {
+    	let x = this.x + (2 * this.scale);
+    	return x <= canvas.width && !this._gridHasBlock(blocks, {x: x, y: this.y});
+    }
+
+    canMoveDown(blocks) {
+    	let y = this.y + this.scale;
+    	return y < canvas.height && !this._gridHasBlock(blocks, {x: this.x, y: y});
+    }
+
+    canRotate(blocks) {
+        let coords = this._getRotationCoords();
+        let x = coords[0];
+        let y = coords[1];
+
+        return x >= 0 && 
+            x <= canvas.width - this.scale && 
+            y >= 0 && 
+            y <= canvas.height - this.scale && 
+            !this._gridHasBlock(blocks, {x: x, y: y});
     }
 
     //subtract center piece relative position from current block position
@@ -61,22 +65,17 @@ class Block {
     //  [6]   [(-) 0]     [6]
     //  [2] + [(-)-2] =>  [0] which is rotated block new position
     //set new center block relative coordinates which are rotation matrix result with - sign
-    // [1]     [-1]
-    // [-2] => [2]
+    // [0]     [-0]
+    // [2] => [-2]
     rotate() {
         let offsetX = this.offsetX;
         let offsetY = this.offsetY;
-        
-        let coords = this.getRotationCoords();
+        let coords = this._getRotationCoords();
+
         this.x = coords[0];
         this.y = coords[1];
-
         this.offsetX = -offsetY;
         this.offsetY = offsetX;
-    }
-
-    gridHasBlock(blocks, block) {
-    	return blocks.find((b) => b.isSameBlock(block));
     }
 
     moveLeft() {
@@ -94,6 +93,10 @@ class Block {
     isSameBlock(block) {
     	return this.x == block.x && this.y == block.y;
 	}
+
+    isAbove(y) {
+        return this.y < y;
+    }
 }
 
 export default Block

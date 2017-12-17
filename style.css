@@ -1,6 +1,16 @@
 #game {
-	border:1px solid #7575a3; 
 	padding: 0, auto; 
 	margin: 0 auto; 
-	display:block;
+	display: block;
+	width: 500px;
+}
+
+#game-canvas {
+	border: 1px solid #7575a3; 
+}
+
+#score {
+	float: right;
+	padding-right: 30px;
+	font-size: 25px;
 }
